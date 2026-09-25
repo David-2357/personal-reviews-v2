@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:personal_reviews/domain/models/category.dart';
 import 'package:personal_reviews/domain/models/folder.dart';
@@ -41,6 +42,9 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
   }
 
   void updateFolderPath(List<FolderDomain> folders) {
+    debugPrint(
+      'Updating folder path: ${folders.map((f) => f.name).join(' / ')}',
+    );
     state = state.copyWith(folderPath: folders);
   }
 

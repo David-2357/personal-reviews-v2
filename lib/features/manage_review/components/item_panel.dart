@@ -1,11 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personal_reviews/features/manage_review/components/folder_path_selector.dart';
 import 'package:personal_reviews/features/manage_review/models/review_form_notifier.dart';
 import 'package:personal_reviews/features/manage_review/providers/category_provider.dart';
+import 'package:personal_reviews/features/manage_review/providers/folder_provider.dart';
 import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/core/constants/category_icons.dart';
 import 'package:personal_reviews/core/extensions/theme_context.dart';
 import 'package:personal_reviews/style/design_system/app_size.dart';
+import 'package:personal_reviews/data/mappers/folder_mapper.dart';
 import 'package:personal_reviews/domain/models/category.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 class ItemPanel extends ConsumerStatefulWidget {
@@ -57,6 +60,13 @@ class _ItemPanelState extends ConsumerState<ItemPanel> {
   Widget build(BuildContext context) {
     final form = ref.watch(reviewFormProvider);
     final allCategories = ref.watch(allCategoriesProvider);
+    final rootFolders = ref.watch(foldersProvider);
+
+    final hasFolder = form.folderPath.isNotEmpty;
+
+    final folderPath = hasFolder
+        ? form.folderPath.map((folder) => folder.name).join(' / ')
+        : 'Sin carpeta';
 
     return Column(
       spacing: AppSpacing.lg,
@@ -142,40 +152,56 @@ class _ItemPanelState extends ConsumerState<ItemPanel> {
           children: [
             Text('Ubicación de la reseña', style: context.textTheme.bodyMedium),
             Container(
+              width: double.infinity,
               padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.nm,
-                vertical: AppSpacing.xxs,
+                vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: context.colors.surfaceContainer,
-
                 border: Border.all(
                   color: context.colors.onSurface.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ref.read(reviewFormProvider).folderPath.isNotEmpty
-                            ? ref
-                                  .read(reviewFormProvider)
-                                  .folderPath
-                                  .map((folder) => folder.name)
-                                  .join(' / ')
-                            : 'Sin carpeta',
-                        style: context.textTheme.bodyLarge,
-                      ),
-                    ],
+                  Expanded(
+                    child: Text(
+                      folderPath,
+                      style: context.textTheme.bodyLarge,
+                      softWrap: hasFolder,
+                    ),
                   ),
+                  const SizedBox(width: AppSpacing.xs),
                   IconButton(
-                    icon: Icon(Icons.edit_rounded),
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.edit_rounded),
                     onPressed: () {
-                      // TODO: Acción de cambiar la ubicación
+                      rootFolders.whenData(
+                        (rootFolders) => showDialog(
+                          context: context,
+                          builder: (context) {
+                            return FolderPathSelector(
+                              selectedPath: form.folderPath.isNotEmpty
+                                  ? form.folderPath
+                                  : null,
+                              rootFolders: rootFolders,
+                              onFolderSelected: (selectedPath) {
+                                ref
+                                    .read(reviewFormProvider.notifier)
+                                    .updateFolderPath(
+                                      FolderWithChildrenMapper.flattenOnlyParentFolders(
+                                        selectedPath,
+                                      ),
+                                    );
+                              },
+                            );
+                          },
+                        ),
+                      );
                     },
                   ),
                 ],
