@@ -26,6 +26,14 @@ abstract class FolderDetailed with _$FolderDetailed {
   }) = _FolderDetailed;
 }
 
+@freezed
+abstract class FolderWithChildren with _$FolderWithChildren {
+  const factory FolderWithChildren({
+    required FolderDomain folder,
+    @Default([]) List<FolderWithChildren> children,
+  }) = _FolderWithChildren;
+}
+
 /* Folder content */
 @freezed
 abstract class FolderContent with _$FolderContent {
