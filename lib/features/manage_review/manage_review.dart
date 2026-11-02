@@ -3,7 +3,9 @@ import 'package:personal_reviews/features/manage_review/components/accordion_hea
 import 'package:personal_reviews/features/manage_review/components/review_panel.dart';
 import 'package:personal_reviews/features/manage_review/components/item_panel.dart';
 import 'package:personal_reviews/features/manage_review/models/review_form_notifier.dart';
+import 'package:personal_reviews/features/manage_review/models/review_form.dart';
 import 'package:personal_reviews/shared/layouts/secondary_layout.dart';
+import 'package:personal_reviews/shared/widgets/app_snackbar.dart';
 import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/core/extensions/theme_context.dart';
 import 'package:personal_reviews/domain/models/category.dart';
@@ -33,6 +35,33 @@ class ManageReviewState extends ConsumerState<ManageReview> {
   set category(CategoryDomain value) {}
 
   set folderPath(List<FolderDetailed> value) {}
+
+  ReviewForm? saveReviewForm() {
+    final form = ref.read(reviewFormProvider);
+    final hasItemName = form.itemName.trim().isNotEmpty;
+    final hasCategory = form.category != null;
+
+    var fieldsNames = '';
+
+    if (!hasItemName) {
+      fieldsNames += 'nombre del objetivo';
+    }
+
+    if (!hasCategory) {
+      if (fieldsNames.isNotEmpty) fieldsNames += ' y la ';
+      fieldsNames += 'categoría';
+    }
+
+    if (!hasItemName || !hasCategory) {
+      AppSnackbar.showWarning(
+        context,
+        'Se necesita $fieldsNames antes de guardar la reseña.',
+      );
+      return null;
+    }
+
+    return form;
+  }
 
   @override
   void initState() {
@@ -127,7 +156,10 @@ class ManageReviewState extends ConsumerState<ManageReview> {
                     overlayColor: context.colors.surface,
                   ),
                   onPressed: () {
-                    // Acción de guardar la reseña
+                    final form = saveReviewForm();
+                    if (form == null) return;
+
+                    // TODO: Llamar a la base de datos con `form`.
                   },
                   label: Text('Guardar'),
                   icon: Icon(Icons.save_rounded),

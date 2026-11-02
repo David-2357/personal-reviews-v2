@@ -75,17 +75,27 @@ class _ItemPanelState extends ConsumerState<ItemPanel> {
           spacing: AppSpacing.sm,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Nombre corto de lo que quieres reseñar',
-              style: context.textTheme.bodyMedium,
+            RichText(
+              text: TextSpan(
+                style: context.textTheme.bodyMedium,
+                children: [
+                  const TextSpan(
+                    text: 'Nombre corto de lo que quieres reseñar ',
+                  ),
+                  TextSpan(
+                    text: '*',
+                    style: TextStyle(color: context.colors.error),
+                  ),
+                ],
+              ),
             ),
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Ej: Matilda, Tarta Mercadona, etc.',
               ),
               maxLength: 100,
-              onChanged: (ref.read(reviewFormProvider.notifier).updateItemName),
+              onChanged: ref.read(reviewFormProvider.notifier).updateItemName,
             ),
           ],
         ),
@@ -95,7 +105,18 @@ class _ItemPanelState extends ConsumerState<ItemPanel> {
           spacing: AppSpacing.sm,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Categoría', style: context.textTheme.bodyMedium),
+            RichText(
+              text: TextSpan(
+                style: context.textTheme.bodyMedium,
+                children: [
+                  const TextSpan(text: 'Categoría '),
+                  TextSpan(
+                    text: '*',
+                    style: TextStyle(color: context.colors.error),
+                  ),
+                ],
+              ),
+            ),
             DropdownButtonFormField<CategoryDomain>(
               initialValue: form.category,
 
@@ -180,6 +201,7 @@ class _ItemPanelState extends ConsumerState<ItemPanel> {
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.edit_rounded),
                     onPressed: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
                       rootFolders.whenData(
                         (rootFolders) => showDialog(
                           context: context,
