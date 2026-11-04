@@ -1,16 +1,20 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personal_reviews/features/manage_review/providers/item_review_provider.dart';
 import 'package:personal_reviews/features/manage_review/components/accordion_header.dart';
+import 'package:personal_reviews/features/manage_review/models/review_form_notifier.dart';
 import 'package:personal_reviews/features/manage_review/components/review_panel.dart';
 import 'package:personal_reviews/features/manage_review/components/item_panel.dart';
-import 'package:personal_reviews/features/manage_review/models/review_form_notifier.dart';
 import 'package:personal_reviews/features/manage_review/models/review_form.dart';
+import 'package:personal_reviews/shared/components/app_critic_error_dialog.dart';
+import 'package:personal_reviews/shared/errors/error_type_presenter.dart';
 import 'package:personal_reviews/shared/layouts/secondary_layout.dart';
-import 'package:personal_reviews/shared/widgets/app_snackbar.dart';
 import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/core/extensions/theme_context.dart';
+import 'package:personal_reviews/shared/widgets/app_snackbar.dart';
+import 'package:personal_reviews/shared/errors/error_type.dart';
 import 'package:personal_reviews/domain/models/category.dart';
 import 'package:personal_reviews/domain/models/folder.dart';
 import 'package:personal_reviews/domain/models/review.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 class ManageReview extends ConsumerStatefulWidget {
@@ -30,26 +34,39 @@ class ManageReview extends ConsumerStatefulWidget {
 }
 
 class ManageReviewState extends ConsumerState<ManageReview> {
-  set itemName(String value) {}
+  bool isSaving = false;
 
-  set category(CategoryDomain value) {}
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notifier = ref.read(reviewFormProvider.notifier);
 
-  set folderPath(List<FolderDetailed> value) {}
+      if (widget.reviewToEdit != null) {
+        notifier.loadFromReview(review: widget.reviewToEdit!);
+      } else {
+        notifier.reset();
+        notifier.updateCategory(widget.category);
+        notifier.updateFolderPath(
+          widget.folderPath.map((folder) => folder.folder).toList(),
+        );
+      }
+    });
+  }
 
   ReviewForm? saveReviewForm() {
     final form = ref.read(reviewFormProvider);
     final hasItemName = form.itemName.trim().isNotEmpty;
     final hasCategory = form.category != null;
-
     var fieldsNames = '';
 
     if (!hasItemName) {
-      fieldsNames += 'nombre del objetivo';
+      fieldsNames += 'el nombre del objetivo';
     }
 
     if (!hasCategory) {
-      if (fieldsNames.isNotEmpty) fieldsNames += ' y la ';
-      fieldsNames += 'categoría';
+      if (fieldsNames.isNotEmpty) fieldsNames += ' y ';
+      fieldsNames += 'la categoría';
     }
 
     if (!hasItemName || !hasCategory) {
@@ -64,26 +81,81 @@ class ManageReviewState extends ConsumerState<ManageReview> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = ref.read(reviewFormProvider.notifier);
-
-      if (widget.reviewToEdit != null) {
-        notifier.loadFromReview(review: widget.reviewToEdit!);
-      } else {
-        notifier.reset();
-
-        notifier.updateCategory(widget.category);
-        notifier.updateFolderPath(
-          widget.folderPath.map((folder) => folder.folder).toList(),
-        );
-      }
-    });
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final itemReviewRepository = ref.watch(itemReviewProvider);
+
+    Future<void> createReview(ReviewForm form) async {
+      final reviewDetailed = form.toReviewDetailed();
+      await itemReviewRepository.createOrUpdateReview(reviewDetailed);
+    }
+
+    Future<void> updateReview(ReviewForm form) async {
+      final reviewDetailed = form.toReviewDetailed();
+      await itemReviewRepository.createOrUpdateReview(reviewDetailed);
+    }
+
+    Future<void> goBackAfterSave() async {
+      if (!mounted || !Navigator.canPop(context)) return;
+
+      debugPrint(
+        'Reseña guardada exitosamente. Regresando a la pantalla anterior...',
+      );
+
+      // Resetear el formulario mientras ref todavía es válido.
+      ref.read(reviewFormProvider.notifier).reset();
+
+      Navigator.pop(context);
+
+      // Mostrar el SnackBar despues de abandonar la pantalla.
+      AppSnackbar.showSuccess(context, 'Reseña guardada exitosamente');
+    }
+
+    Future<void> save() async {
+      if (isSaving || !mounted) return;
+
+      final form = saveReviewForm();
+
+      if (form == null || !mounted) return;
+
+      setState(() {
+        isSaving = true;
+      });
+
+      try {
+        if (widget.reviewToEdit != null) {
+          await updateReview(form);
+        } else {
+          await createReview(form);
+        }
+
+        if (!mounted) return;
+
+        await goBackAfterSave();
+      } catch (e) {
+        if (!mounted) return;
+
+        AppCriticErrorDialog.show(
+          context,
+          ErrorTypePresenter.of(ErrorType.database),
+          'Ocurrió un error al guardar la reseña. Por favor, inténtalo de nuevo.',
+          onRetry: () async {
+            await save();
+          },
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            isSaving = false;
+          });
+        }
+      }
+    }
+
     return SecondaryLayout(
       title: 'Crear reseña',
       scrollable: true,
@@ -154,14 +226,18 @@ class ManageReviewState extends ConsumerState<ManageReview> {
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     overlayColor: context.colors.surface,
+                    backgroundColor: isSaving
+                        ? context.colors.primaryContainer.withValues(alpha: 0.5)
+                        : context.colors.primaryContainer,
                   ),
                   onPressed: () {
-                    final form = saveReviewForm();
-                    if (form == null) return;
-
-                    // TODO: Llamar a la base de datos con `form`.
+                    if (!isSaving) {
+                      save();
+                    }
                   },
-                  label: Text('Guardar'),
+                  label: isSaving
+                      ? const Text('Guardando...')
+                      : const Text('Guardar'),
                   icon: Icon(Icons.save_rounded),
                 ),
               ),
