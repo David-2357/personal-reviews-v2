@@ -1757,7 +1757,9 @@ class $ReviewsTable extends Reviews with TableInfo<$ReviewsTable, Review> {
     'rating',
     aliasedName,
     false,
-    check: () => ComparableExpr(rating).isBetweenValues(0.0, 5.0),
+    check: () =>
+        ComparableExpr(rating).isBiggerOrEqual(const Constant(0.0)) &
+        ComparableExpr(rating).isSmallerOrEqual(const Constant(5.0)),
     type: DriftSqlType.double,
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),

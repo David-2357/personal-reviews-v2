@@ -8,7 +8,10 @@ class Reviews extends Table {
   IntColumn get id => integer().autoIncrement()();
   Column<double> get rating => real()
       .withDefault(const Constant(0.0))
-      .check(rating.isBetweenValues(0.0, 5.0))();
+      .check(
+        rating.isBiggerOrEqual(const Constant(0.0)) &
+            rating.isSmallerOrEqual(const Constant(5.0)),
+      )();
   TextColumn get comment => text()();
 
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
