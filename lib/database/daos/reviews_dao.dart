@@ -34,7 +34,7 @@ class ReviewsDao extends DatabaseAccessor<AppDatabase> with _$ReviewsDaoMixin {
   }
 
   Future<int> create({
-    required String comment,
+    String comment = '',
     required double rating,
     required int itemId,
   }) {

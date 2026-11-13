@@ -59,7 +59,7 @@ class ReviewRepository {
   }
 
   Future<int> create({
-    required String comment,
+    String comment = '',
     required double rating,
     required int itemId,
   }) {
