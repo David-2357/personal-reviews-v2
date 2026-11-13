@@ -112,11 +112,7 @@ class AppDatabase extends _$AppDatabase {
 
       beforeOpen: (openingDetails) async {
         if (isInDebugMode) {
-          final m = createMigrator();
-          for (final table in allTables) {
-            await m.deleteTable(table.actualTableName);
-            await m.createTable(table);
-          }
+          await deleteDatabase();
         }
       },
     );
