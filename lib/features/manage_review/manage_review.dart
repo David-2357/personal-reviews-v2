@@ -1,9 +1,8 @@
 import 'package:personal_reviews/features/manage_review/providers/item_review_provider.dart';
 import 'package:personal_reviews/features/manage_review/components/accordion_header.dart';
-import 'package:personal_reviews/features/manage_review/models/review_form_notifier.dart';
+import 'package:personal_reviews/features/manage_review/notifiers/review_form_notifier.dart';
 import 'package:personal_reviews/features/manage_review/components/review_panel.dart';
 import 'package:personal_reviews/features/manage_review/components/item_panel.dart';
-import 'package:personal_reviews/features/manage_review/models/review_form.dart';
 import 'package:personal_reviews/shared/components/app_critic_error_dialog.dart';
 import 'package:personal_reviews/shared/errors/error_type_presenter.dart';
 import 'package:personal_reviews/shared/layouts/secondary_layout.dart';
@@ -25,7 +24,7 @@ class ManageReview extends ConsumerStatefulWidget {
     this.reviewToEdit,
   });
 
-  final ReviewDetailed? reviewToEdit;
+  final ReviewForm? reviewToEdit;
   final List<FolderDetailed> folderPath;
   final CategoryDomain? category;
 
@@ -43,10 +42,13 @@ class ManageReviewState extends ConsumerState<ManageReview> {
       final notifier = ref.read(reviewFormProvider.notifier);
 
       if (widget.reviewToEdit != null) {
-        notifier.loadFromReview(review: widget.reviewToEdit!);
+        notifier.loadFromForm(form: widget.reviewToEdit!);
       } else {
         notifier.reset();
-        notifier.updateCategory(widget.category);
+        notifier.updateCategory(
+          widget.category?.id ?? 0,
+          widget.category?.name ?? '',
+        );
         notifier.updateFolderPath(
           widget.folderPath.map((folder) => folder.folder).toList(),
         );
@@ -57,7 +59,8 @@ class ManageReviewState extends ConsumerState<ManageReview> {
   ReviewForm? saveReviewForm() {
     final form = ref.read(reviewFormProvider);
     final hasItemName = form.itemName.trim().isNotEmpty;
-    final hasCategory = form.category != null;
+    final hasCategory = form.categoryId != null;
+
     var fieldsNames = '';
 
     if (!hasItemName) {
@@ -90,13 +93,11 @@ class ManageReviewState extends ConsumerState<ManageReview> {
     final itemReviewRepository = ref.watch(itemReviewProvider);
 
     Future<void> createReview(ReviewForm form) async {
-      final reviewDetailed = form.toReviewDetailed();
-      await itemReviewRepository.createOrUpdateReview(reviewDetailed);
+      await itemReviewRepository.createOrUpdateReview(form);
     }
 
     Future<void> updateReview(ReviewForm form) async {
-      final reviewDetailed = form.toReviewDetailed();
-      await itemReviewRepository.createOrUpdateReview(reviewDetailed);
+      await itemReviewRepository.createOrUpdateReview(form);
     }
 
     Future<void> goBackAfterSave() async {
@@ -142,6 +143,7 @@ class ManageReviewState extends ConsumerState<ManageReview> {
         AppCriticErrorDialog.show(
           context,
           ErrorTypePresenter.of(ErrorType.database),
+          //'Ocurrió un error al guardar la reseña. Por favor, inténtalo de nuevo.',
           'Ocurrió un error al guardar la reseña. Por favor, inténtalo de nuevo.',
           onRetry: () async {
             await save();
@@ -157,7 +159,7 @@ class ManageReviewState extends ConsumerState<ManageReview> {
     }
 
     return SecondaryLayout(
-      title: 'Crear reseña',
+      title: widget.reviewToEdit != null ? 'Editar Reseña' : 'Nueva Reseña',
       scrollable: true,
       child: Column(
         spacing: AppSpacing.xxl,

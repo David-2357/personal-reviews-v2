@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personal_reviews/features/manage_review/components/photo_picker_field.dart';
 import 'package:personal_reviews/features/manage_review/components/rating_input.dart';
-import 'package:personal_reviews/features/manage_review/models/review_form_notifier.dart';
+import 'package:personal_reviews/features/manage_review/notifiers/review_form_notifier.dart';
 import 'package:personal_reviews/shared/components/rating_display.dart';
 import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/core/extensions/theme_context.dart';

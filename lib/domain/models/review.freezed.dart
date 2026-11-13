@@ -638,4 +638,557 @@ $CategoryDomainCopyWith<$Res>? get category {
 }
 }
 
+/// @nodoc
+mixin _$ReviewFormImage {
+
+ String get path; int? get id;
+/// Create a copy of ReviewFormImage
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ReviewFormImageCopyWith<ReviewFormImage> get copyWith => _$ReviewFormImageCopyWithImpl<ReviewFormImage>(this as ReviewFormImage, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReviewFormImage&&(identical(other.path, path) || other.path == path)&&(identical(other.id, id) || other.id == id));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,path,id);
+
+@override
+String toString() {
+  return 'ReviewFormImage(path: $path, id: $id)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ReviewFormImageCopyWith<$Res>  {
+  factory $ReviewFormImageCopyWith(ReviewFormImage value, $Res Function(ReviewFormImage) _then) = _$ReviewFormImageCopyWithImpl;
+@useResult
+$Res call({
+ String path, int? id
+});
+
+
+
+
+}
+/// @nodoc
+class _$ReviewFormImageCopyWithImpl<$Res>
+    implements $ReviewFormImageCopyWith<$Res> {
+  _$ReviewFormImageCopyWithImpl(this._self, this._then);
+
+  final ReviewFormImage _self;
+  final $Res Function(ReviewFormImage) _then;
+
+/// Create a copy of ReviewFormImage
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? path = null,Object? id = freezed,}) {
+  return _then(_self.copyWith(
+path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
+as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ReviewFormImage].
+extension ReviewFormImagePatterns on ReviewFormImage {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ReviewFormImage value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ReviewFormImage() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ReviewFormImage value)  $default,){
+final _that = this;
+switch (_that) {
+case _ReviewFormImage():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ReviewFormImage value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ReviewFormImage() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String path,  int? id)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ReviewFormImage() when $default != null:
+return $default(_that.path,_that.id);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String path,  int? id)  $default,) {final _that = this;
+switch (_that) {
+case _ReviewFormImage():
+return $default(_that.path,_that.id);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String path,  int? id)?  $default,) {final _that = this;
+switch (_that) {
+case _ReviewFormImage() when $default != null:
+return $default(_that.path,_that.id);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _ReviewFormImage extends ReviewFormImage {
+  const _ReviewFormImage({required this.path, this.id}): super._();
+  
+
+@override final  String path;
+@override final  int? id;
+
+/// Create a copy of ReviewFormImage
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ReviewFormImageCopyWith<_ReviewFormImage> get copyWith => __$ReviewFormImageCopyWithImpl<_ReviewFormImage>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReviewFormImage&&(identical(other.path, path) || other.path == path)&&(identical(other.id, id) || other.id == id));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,path,id);
+
+@override
+String toString() {
+  return 'ReviewFormImage(path: $path, id: $id)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ReviewFormImageCopyWith<$Res> implements $ReviewFormImageCopyWith<$Res> {
+  factory _$ReviewFormImageCopyWith(_ReviewFormImage value, $Res Function(_ReviewFormImage) _then) = __$ReviewFormImageCopyWithImpl;
+@override @useResult
+$Res call({
+ String path, int? id
+});
+
+
+
+
+}
+/// @nodoc
+class __$ReviewFormImageCopyWithImpl<$Res>
+    implements _$ReviewFormImageCopyWith<$Res> {
+  __$ReviewFormImageCopyWithImpl(this._self, this._then);
+
+  final _ReviewFormImage _self;
+  final $Res Function(_ReviewFormImage) _then;
+
+/// Create a copy of ReviewFormImage
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? path = null,Object? id = freezed,}) {
+  return _then(_ReviewFormImage(
+path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
+as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$ReviewForm {
+
+ int get reviewId; double get rating; String get comment; List<ReviewFormImage> get images; String get itemName; int? get categoryId; String? get categoryName; List<FolderDomain> get folderPath; int? get itemId;
+/// Create a copy of ReviewForm
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ReviewFormCopyWith<ReviewForm> get copyWith => _$ReviewFormCopyWithImpl<ReviewForm>(this as ReviewForm, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReviewForm&&(identical(other.reviewId, reviewId) || other.reviewId == reviewId)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.comment, comment) || other.comment == comment)&&const DeepCollectionEquality().equals(other.images, images)&&(identical(other.itemName, itemName) || other.itemName == itemName)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&const DeepCollectionEquality().equals(other.folderPath, folderPath)&&(identical(other.itemId, itemId) || other.itemId == itemId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,reviewId,rating,comment,const DeepCollectionEquality().hash(images),itemName,categoryId,categoryName,const DeepCollectionEquality().hash(folderPath),itemId);
+
+@override
+String toString() {
+  return 'ReviewForm(reviewId: $reviewId, rating: $rating, comment: $comment, images: $images, itemName: $itemName, categoryId: $categoryId, categoryName: $categoryName, folderPath: $folderPath, itemId: $itemId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ReviewFormCopyWith<$Res>  {
+  factory $ReviewFormCopyWith(ReviewForm value, $Res Function(ReviewForm) _then) = _$ReviewFormCopyWithImpl;
+@useResult
+$Res call({
+ int reviewId, double rating, String comment, List<ReviewFormImage> images, String itemName, int? categoryId, String? categoryName, List<FolderDomain> folderPath, int? itemId
+});
+
+
+
+
+}
+/// @nodoc
+class _$ReviewFormCopyWithImpl<$Res>
+    implements $ReviewFormCopyWith<$Res> {
+  _$ReviewFormCopyWithImpl(this._self, this._then);
+
+  final ReviewForm _self;
+  final $Res Function(ReviewForm) _then;
+
+/// Create a copy of ReviewForm
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? reviewId = null,Object? rating = null,Object? comment = null,Object? images = null,Object? itemName = null,Object? categoryId = freezed,Object? categoryName = freezed,Object? folderPath = null,Object? itemId = freezed,}) {
+  return _then(_self.copyWith(
+reviewId: null == reviewId ? _self.reviewId : reviewId // ignore: cast_nullable_to_non_nullable
+as int,rating: null == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
+as double,comment: null == comment ? _self.comment : comment // ignore: cast_nullable_to_non_nullable
+as String,images: null == images ? _self.images : images // ignore: cast_nullable_to_non_nullable
+as List<ReviewFormImage>,itemName: null == itemName ? _self.itemName : itemName // ignore: cast_nullable_to_non_nullable
+as String,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as int?,categoryName: freezed == categoryName ? _self.categoryName : categoryName // ignore: cast_nullable_to_non_nullable
+as String?,folderPath: null == folderPath ? _self.folderPath : folderPath // ignore: cast_nullable_to_non_nullable
+as List<FolderDomain>,itemId: freezed == itemId ? _self.itemId : itemId // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ReviewForm].
+extension ReviewFormPatterns on ReviewForm {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ReviewForm value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ReviewForm() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ReviewForm value)  $default,){
+final _that = this;
+switch (_that) {
+case _ReviewForm():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ReviewForm value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ReviewForm() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int reviewId,  double rating,  String comment,  List<ReviewFormImage> images,  String itemName,  int? categoryId,  String? categoryName,  List<FolderDomain> folderPath,  int? itemId)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ReviewForm() when $default != null:
+return $default(_that.reviewId,_that.rating,_that.comment,_that.images,_that.itemName,_that.categoryId,_that.categoryName,_that.folderPath,_that.itemId);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int reviewId,  double rating,  String comment,  List<ReviewFormImage> images,  String itemName,  int? categoryId,  String? categoryName,  List<FolderDomain> folderPath,  int? itemId)  $default,) {final _that = this;
+switch (_that) {
+case _ReviewForm():
+return $default(_that.reviewId,_that.rating,_that.comment,_that.images,_that.itemName,_that.categoryId,_that.categoryName,_that.folderPath,_that.itemId);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int reviewId,  double rating,  String comment,  List<ReviewFormImage> images,  String itemName,  int? categoryId,  String? categoryName,  List<FolderDomain> folderPath,  int? itemId)?  $default,) {final _that = this;
+switch (_that) {
+case _ReviewForm() when $default != null:
+return $default(_that.reviewId,_that.rating,_that.comment,_that.images,_that.itemName,_that.categoryId,_that.categoryName,_that.folderPath,_that.itemId);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _ReviewForm extends ReviewForm {
+  const _ReviewForm({this.reviewId = 0, this.rating = 0.0, this.comment = '', final  List<ReviewFormImage> images = const [], this.itemName = '', this.categoryId, this.categoryName, final  List<FolderDomain> folderPath = const [], this.itemId}): _images = images,_folderPath = folderPath,super._();
+  
+
+@override@JsonKey() final  int reviewId;
+@override@JsonKey() final  double rating;
+@override@JsonKey() final  String comment;
+ final  List<ReviewFormImage> _images;
+@override@JsonKey() List<ReviewFormImage> get images {
+  if (_images is EqualUnmodifiableListView) return _images;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_images);
+}
+
+@override@JsonKey() final  String itemName;
+@override final  int? categoryId;
+@override final  String? categoryName;
+ final  List<FolderDomain> _folderPath;
+@override@JsonKey() List<FolderDomain> get folderPath {
+  if (_folderPath is EqualUnmodifiableListView) return _folderPath;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_folderPath);
+}
+
+@override final  int? itemId;
+
+/// Create a copy of ReviewForm
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ReviewFormCopyWith<_ReviewForm> get copyWith => __$ReviewFormCopyWithImpl<_ReviewForm>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReviewForm&&(identical(other.reviewId, reviewId) || other.reviewId == reviewId)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.comment, comment) || other.comment == comment)&&const DeepCollectionEquality().equals(other._images, _images)&&(identical(other.itemName, itemName) || other.itemName == itemName)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&const DeepCollectionEquality().equals(other._folderPath, _folderPath)&&(identical(other.itemId, itemId) || other.itemId == itemId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,reviewId,rating,comment,const DeepCollectionEquality().hash(_images),itemName,categoryId,categoryName,const DeepCollectionEquality().hash(_folderPath),itemId);
+
+@override
+String toString() {
+  return 'ReviewForm(reviewId: $reviewId, rating: $rating, comment: $comment, images: $images, itemName: $itemName, categoryId: $categoryId, categoryName: $categoryName, folderPath: $folderPath, itemId: $itemId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ReviewFormCopyWith<$Res> implements $ReviewFormCopyWith<$Res> {
+  factory _$ReviewFormCopyWith(_ReviewForm value, $Res Function(_ReviewForm) _then) = __$ReviewFormCopyWithImpl;
+@override @useResult
+$Res call({
+ int reviewId, double rating, String comment, List<ReviewFormImage> images, String itemName, int? categoryId, String? categoryName, List<FolderDomain> folderPath, int? itemId
+});
+
+
+
+
+}
+/// @nodoc
+class __$ReviewFormCopyWithImpl<$Res>
+    implements _$ReviewFormCopyWith<$Res> {
+  __$ReviewFormCopyWithImpl(this._self, this._then);
+
+  final _ReviewForm _self;
+  final $Res Function(_ReviewForm) _then;
+
+/// Create a copy of ReviewForm
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? reviewId = null,Object? rating = null,Object? comment = null,Object? images = null,Object? itemName = null,Object? categoryId = freezed,Object? categoryName = freezed,Object? folderPath = null,Object? itemId = freezed,}) {
+  return _then(_ReviewForm(
+reviewId: null == reviewId ? _self.reviewId : reviewId // ignore: cast_nullable_to_non_nullable
+as int,rating: null == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
+as double,comment: null == comment ? _self.comment : comment // ignore: cast_nullable_to_non_nullable
+as String,images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
+as List<ReviewFormImage>,itemName: null == itemName ? _self.itemName : itemName // ignore: cast_nullable_to_non_nullable
+as String,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as int?,categoryName: freezed == categoryName ? _self.categoryName : categoryName // ignore: cast_nullable_to_non_nullable
+as String?,folderPath: null == folderPath ? _self._folderPath : folderPath // ignore: cast_nullable_to_non_nullable
+as List<FolderDomain>,itemId: freezed == itemId ? _self.itemId : itemId // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+
+}
+
 // dart format on

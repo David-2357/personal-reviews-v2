@@ -1,5 +1,5 @@
 import 'package:personal_reviews/features/manage_review/components/folder_path_selector.dart';
-import 'package:personal_reviews/features/manage_review/models/review_form_notifier.dart';
+import 'package:personal_reviews/features/manage_review/notifiers/review_form_notifier.dart';
 import 'package:personal_reviews/features/manage_review/providers/category_provider.dart';
 import 'package:personal_reviews/features/manage_review/providers/folder_provider.dart';
 import 'package:personal_reviews/style/design_system/app_spacing.dart';
@@ -7,7 +7,6 @@ import 'package:personal_reviews/core/constants/category_icons.dart';
 import 'package:personal_reviews/core/extensions/theme_context.dart';
 import 'package:personal_reviews/style/design_system/app_size.dart';
 import 'package:personal_reviews/data/mappers/folder_mapper.dart';
-import 'package:personal_reviews/domain/models/category.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
@@ -117,17 +116,18 @@ class _ItemPanelState extends ConsumerState<ItemPanel> {
                 ],
               ),
             ),
-            DropdownButtonFormField<CategoryDomain>(
-              initialValue: form.category,
-
-              decoration: InputDecoration(hintText: 'Selecciona una categoría'),
-
+            DropdownButtonFormField<int>(
+              initialValue: form.categoryId == 0 ? null : form.categoryId,
+              decoration: const InputDecoration(
+                hintText: 'Selecciona una categoría',
+              ),
               items: allCategories.when(
                 data: (categories) {
                   return categories.map((category) {
                     final categoryIcon = getCategoryIcon(category.icon);
-                    return DropdownMenuItem<CategoryDomain>(
-                      value: category,
+
+                    return DropdownMenuItem<int>(
+                      value: category.id,
                       child: Row(
                         spacing: AppSpacing.sm,
                         children: [
@@ -142,31 +142,38 @@ class _ItemPanelState extends ConsumerState<ItemPanel> {
                     );
                   }).toList();
                 },
-                loading: () => [
-                  const DropdownMenuItem<CategoryDomain>(
-                    value: null,
+                loading: () => const [
+                  DropdownMenuItem(
+                    value: 0,
                     child: Text('Cargando categorías...'),
                   ),
                 ],
-                error: (error, stack) => [
-                  const DropdownMenuItem<CategoryDomain>(
-                    value: null,
-                    child: Text('Error al cargar categorías'),
-                  ),
-                ],
+                error: (error, stack) => const [],
               ),
-
-              onChanged: (CategoryDomain? newCategory) {
-                if (newCategory != null) {
+              onChanged: (int? categoryId) {
+                if (categoryId != null) {
                   ref
                       .read(reviewFormProvider.notifier)
-                      .updateCategory(newCategory);
+                      .updateCategory(
+                        categoryId,
+                        allCategories.maybeWhen(
+                          data: (categories) {
+                            final categoryName = categories
+                                .firstWhere(
+                                  (category) => category.id == categoryId,
+                                )
+                                .name;
+                            return categoryName;
+                          },
+                          orElse: () => '',
+                        ),
+                      );
                 }
               },
             ),
           ],
         ),
-
+        // Ubicación de la reseña (folder path)
         Column(
           spacing: AppSpacing.sm,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,8 +265,8 @@ class ItemSummary extends ConsumerWidget {
         ),
 
         Text(
-          form.category != null
-              ? 'Categoría ${form.category?.name.toLowerCase()}'
+          form.categoryExists
+              ? 'Categoría ${form.categoryName?.toLowerCase()}'
               : 'Sin categoría',
           style: context.textTheme.bodySmall?.copyWith(
             color: context.colors.onSurfaceVariant,

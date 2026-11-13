@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:personal_reviews/domain/models/category.dart';
 import 'package:personal_reviews/domain/models/folder.dart';
 import 'package:personal_reviews/domain/models/review.dart';
-import 'package:personal_reviews/features/manage_review/models/review_form.dart';
 
 class ReviewFormNotifier extends StateNotifier<ReviewForm> {
   ReviewFormNotifier()
@@ -15,14 +13,18 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
       comment: review.review.comment,
       images: review.review.images != null
           ? review.review.images!.entries
-                .map((e) => ItemImage(id: e.key, path: e.value))
+                .map((e) => ReviewFormImage(id: e.key, path: e.value))
                 .toList()
-          : [],
+          : const [],
       itemId: review.item?.id,
       itemName: review.item?.name ?? '',
-      category: review.category,
+      categoryId: review.category?.id,
       folderPath: review.folderPath,
     );
+  }
+
+  void loadFromForm({required ReviewForm form}) {
+    state = form;
   }
 
   void updateRating(double rating) {
@@ -37,8 +39,8 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
     state = state.copyWith(itemName: name);
   }
 
-  void updateCategory(CategoryDomain? category) {
-    state = state.copyWith(category: category);
+  void updateCategory(int categoryId, String categoryName) {
+    state = state.copyWith(categoryId: categoryId, categoryName: categoryName);
   }
 
   void updateFolderPath(List<FolderDomain> folders) {
@@ -53,7 +55,7 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
   }
 
   void addExistingImage(int id, String path) {
-    final image = ItemImage(id: id, path: path);
+    final image = ReviewFormImage(id: id, path: path);
     state = state.copyWith(images: [...state.images, image]);
   }
 
@@ -64,7 +66,7 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
   }
 
   void addNewImage(String path) {
-    final image = ItemImage(path: path);
+    final image = ReviewFormImage(path: path);
     state = state.copyWith(images: [...state.images, image]);
   }
 
@@ -79,12 +81,12 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
 
     state = state.copyWith(
       images: imagePaths
-          .map((path) => currentByPath[path] ?? ItemImage(path: path))
+          .map((path) => currentByPath[path] ?? ReviewFormImage(path: path))
           .toList(),
     );
   }
 
-  void replaceImages(List<ItemImage> images) {
+  void replaceImages(List<ReviewFormImage> images) {
     state = state.copyWith(images: images);
   }
 
