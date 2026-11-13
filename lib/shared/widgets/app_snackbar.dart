@@ -1,4 +1,3 @@
-import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/style/design_system/app_radius.dart';
 import 'package:personal_reviews/style/theme/app_colors.dart';
 import 'package:flutter/material.dart';
