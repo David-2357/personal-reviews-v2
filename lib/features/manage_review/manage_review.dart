@@ -3,6 +3,7 @@ import 'package:personal_reviews/features/manage_review/components/accordion_hea
 import 'package:personal_reviews/features/manage_review/notifiers/review_form_notifier.dart';
 import 'package:personal_reviews/features/manage_review/components/review_panel.dart';
 import 'package:personal_reviews/features/manage_review/components/item_panel.dart';
+import 'package:personal_reviews/shared/components/app_confirmation_dialog.dart';
 import 'package:personal_reviews/shared/components/app_critic_error_dialog.dart';
 import 'package:personal_reviews/shared/errors/error_type_presenter.dart';
 import 'package:personal_reviews/shared/layouts/secondary_layout.dart';
@@ -15,6 +16,7 @@ import 'package:personal_reviews/domain/models/folder.dart';
 import 'package:personal_reviews/domain/models/review.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:personal_reviews/style/theme/app_colors.dart';
 
 class ManageReview extends ConsumerStatefulWidget {
   const ManageReview({
@@ -34,6 +36,9 @@ class ManageReview extends ConsumerStatefulWidget {
 
 class ManageReviewState extends ConsumerState<ManageReview> {
   bool isSaving = false;
+  bool _allowPop = false;
+  bool _isShowingDiscardDialog = false;
+  bool isEditing = false;
 
   @override
   void initState() {
@@ -43,7 +48,9 @@ class ManageReviewState extends ConsumerState<ManageReview> {
 
       if (widget.reviewToEdit != null) {
         notifier.loadFromForm(form: widget.reviewToEdit!);
+        isEditing = true;
       } else {
+        isEditing = false;
         notifier.reset();
         notifier.updateCategory(
           widget.category?.id ?? 0,
@@ -59,7 +66,7 @@ class ManageReviewState extends ConsumerState<ManageReview> {
   ReviewForm? saveReviewForm() {
     final form = ref.read(reviewFormProvider);
     final hasItemName = form.itemName.trim().isNotEmpty;
-    final hasCategory = form.categoryId != null;
+    final hasCategory = form.categoryId != null && form.categoryId! > 0;
 
     var fieldsNames = '';
 
@@ -91,14 +98,12 @@ class ManageReviewState extends ConsumerState<ManageReview> {
   @override
   Widget build(BuildContext context) {
     final itemReviewRepository = ref.watch(itemReviewProvider);
+    ref.watch(reviewFormProvider);
 
-    Future<void> createReview(ReviewForm form) async {
-      await itemReviewRepository.createOrUpdateReview(form);
-    }
-
-    Future<void> updateReview(ReviewForm form) async {
-      await itemReviewRepository.createOrUpdateReview(form);
-    }
+    final reviewFormNotifier = ref.read(reviewFormProvider.notifier);
+    final hasChanges =
+        (isEditing && reviewFormNotifier.hasChanges(widget.reviewToEdit!) ||
+        !isEditing && !reviewFormNotifier.isEmpty());
 
     Future<void> goBackAfterSave() async {
       if (!mounted || !Navigator.canPop(context)) return;
@@ -128,11 +133,7 @@ class ManageReviewState extends ConsumerState<ManageReview> {
       });
 
       try {
-        if (widget.reviewToEdit != null) {
-          await updateReview(form);
-        } else {
-          await createReview(form);
-        }
+        await itemReviewRepository.createOrUpdateReview(form);
 
         if (!mounted) return;
 
@@ -144,7 +145,7 @@ class ManageReviewState extends ConsumerState<ManageReview> {
           context,
           ErrorTypePresenter.of(ErrorType.database),
           //'Ocurrió un error al guardar la reseña. Por favor, inténtalo de nuevo.',
-          'Ocurrió un error al guardar la reseña. Por favor, inténtalo de nuevo.',
+          e.toString(),
           onRetry: () async {
             await save();
           },
@@ -158,96 +159,195 @@ class ManageReviewState extends ConsumerState<ManageReview> {
       }
     }
 
-    return SecondaryLayout(
-      title: widget.reviewToEdit != null ? 'Editar Reseña' : 'Nueva Reseña',
-      scrollable: true,
-      child: Column(
-        spacing: AppSpacing.xxl,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ExpansionPanelList.radio(
-            elevation: 0,
-            initialOpenPanelValue: 'review_panel',
-            dividerColor: context.colors.onSurface.withValues(alpha: 0.2),
-            expandedHeaderPadding: const EdgeInsets.symmetric(
-              vertical: AppSpacing.xs,
+    Future<void> onResetPressed() async {
+      debugPrint(
+        isEditing
+            ? 'Checking for changes in the form compared to the review being edited...'
+            : 'Checking if the form has any changes...',
+      );
+
+      if (hasChanges) {
+        AppConfirmationDialog.show(
+          context,
+          title: isEditing
+              ? '¿Volver con los cambios de la reseña original?'
+              : '¿Volver a la reseña en blanco?',
+          confirmText: 'Aceptar',
+          cancelText: 'Cancelar',
+          icon: Icons.restart_alt_rounded,
+        ).then((confirmed) {
+          if (confirmed == true) {
+            reviewFormNotifier.reset();
+          }
+        });
+      } else {
+        reviewFormNotifier.reset();
+      }
+    }
+
+    return PopScope(
+      canPop: (!isSaving && !hasChanges) || _allowPop,
+      onPopInvokedWithResult: (didPop, result) async {
+        debugPrint(
+          'PopScope invoked. canPop: ${!isSaving && !hasChanges}, _allowPop: $_allowPop, didPop: $didPop',
+        );
+
+        debugPrint(
+          'Is saving: $isSaving, has changes: $hasChanges, allow pop: $_allowPop',
+        );
+
+        debugPrint('Review form state: ${ref.read(reviewFormProvider)}');
+        if (didPop || _isShowingDiscardDialog) return;
+
+        _isShowingDiscardDialog = true;
+
+        final navigator = Navigator.of(context);
+
+        final confirmed = await AppConfirmationDialog.show(
+          context,
+          title: '¿Quieres descartar los cambios?',
+          confirmText: 'Descartar',
+          cancelText: 'Seguir editando',
+          icon: Icons.warning_amber,
+          confirmColor: AppColors.warningContainer,
+        );
+
+        _isShowingDiscardDialog = false;
+
+        if (confirmed != true || !mounted) return;
+
+        setState(() {
+          _allowPop = true;
+        });
+
+        // Espera a que PopScope actualice canPop.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && navigator.mounted) {
+            navigator.pop();
+          }
+        });
+      },
+      child: SecondaryLayout(
+        title: isEditing ? 'Editar Reseña' : 'Nueva Reseña',
+        scrollable: true,
+        child: Column(
+          spacing: AppSpacing.lg,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // If its editing a review, show an alert
+            if (isEditing)
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(AppSpacing.sm),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Estás editando la reseña de "${widget.reviewToEdit?.itemName}".',
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ExpansionPanelList.radio(
+              elevation: 0,
+              initialOpenPanelValue: 'review_panel',
+              dividerColor: context.colors.onSurface.withValues(alpha: 0.2),
+              expandedHeaderPadding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.xs,
+              ),
+
+              children: [
+                /* Review Panel */
+                ExpansionPanelRadio(
+                  canTapOnHeader: true,
+                  value: 'review_panel',
+                  headerBuilder: (context, isExpanded) {
+                    return AccordionHeader(
+                      title: 'Reseña',
+                      isExpanded: isExpanded,
+                      summary: ReviewSummary(),
+                    );
+                  },
+
+                  body: ReviewPanel(),
+                ),
+
+                /* Item Panel */
+                ExpansionPanelRadio(
+                  canTapOnHeader: true,
+                  value: 'item_panel',
+                  headerBuilder: (context, isExpanded) {
+                    return AccordionHeader(
+                      title: 'Objetivo de la reseña',
+                      isExpanded: isExpanded,
+                      summary: ItemSummary(),
+                    );
+                  },
+
+                  body: ItemPanel(),
+                ),
+              ],
             ),
 
-            children: [
-              /* Review Panel */
-              ExpansionPanelRadio(
-                canTapOnHeader: true,
-                value: 'review_panel',
-                headerBuilder: (context, isExpanded) {
-                  return AccordionHeader(
-                    title: 'Reseña',
-                    isExpanded: isExpanded,
-                    summary: ReviewSummary(),
-                  );
-                },
-
-                body: ReviewPanel(),
-              ),
-
-              /* Item Panel */
-              ExpansionPanelRadio(
-                canTapOnHeader: true,
-                value: 'item_panel',
-                headerBuilder: (context, isExpanded) {
-                  return AccordionHeader(
-                    title: 'Objetivo de la reseña',
-                    isExpanded: isExpanded,
-                    summary: ItemSummary(),
-                  );
-                },
-
-                body: ItemPanel(),
-              ),
-            ],
-          ),
-
-          /* Save and Reset Buttons */
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            spacing: AppSpacing.sm,
-            children: [
-              Expanded(
-                // Reset button
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    overlayColor: context.colors.surface,
+            /* Save and Reset Buttons */
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              spacing: AppSpacing.sm,
+              children: [
+                Expanded(
+                  // Reset button
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      overlayColor: context.colors.surface,
+                    ),
+                    onPressed: () {
+                      onResetPressed();
+                    },
+                    label: Text('Resetear'),
+                    icon: Icon(Icons.restart_alt_rounded),
                   ),
-                  onPressed: () {
-                    ref.read(reviewFormProvider.notifier).reset();
-                  },
-                  label: Text('Resetear'),
-                  icon: Icon(Icons.restart_alt_rounded),
                 ),
-              ),
-              Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    overlayColor: context.colors.surface,
-                    backgroundColor: isSaving
-                        ? context.colors.primaryContainer.withValues(alpha: 0.5)
-                        : context.colors.primaryContainer,
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      overlayColor: context.colors.surface,
+                      backgroundColor: isSaving
+                          ? context.colors.primaryContainer.withValues(
+                              alpha: 0.5,
+                            )
+                          : context.colors.primaryContainer,
+                    ),
+                    onPressed: () {
+                      if (!isSaving) {
+                        save();
+                      }
+                    },
+                    label: isSaving
+                        ? const Text('Guardando...')
+                        : const Text('Guardar'),
+                    icon: Icon(Icons.save_rounded),
                   ),
-                  onPressed: () {
-                    if (!isSaving) {
-                      save();
-                    }
-                  },
-                  label: isSaving
-                      ? const Text('Guardando...')
-                      : const Text('Guardar'),
-                  icon: Icon(Icons.save_rounded),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: AppSpacing.listBottomSpacing),
-        ],
+            const SizedBox(height: AppSpacing.listBottomSpacing),
+          ],
+        ),
       ),
     );
   }
