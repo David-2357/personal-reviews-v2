@@ -7,6 +7,25 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
   ReviewFormNotifier()
     : super(ReviewForm(rating: 0, comment: '', images: const [], itemName: ''));
 
+  bool hasChanges(ReviewForm other) {
+    return state.rating != other.rating ||
+        state.comment != other.comment ||
+        state.itemName != other.itemName ||
+        state.categoryId != other.categoryId ||
+        state.folderPath != other.folderPath ||
+        state.images.length != other.images.length ||
+        !state.images.every((image) => other.images.contains(image));
+  }
+
+  bool isEmpty() {
+    return state.rating == 0 &&
+        state.comment.isEmpty &&
+        state.itemName.isEmpty &&
+        state.categoryId == null &&
+        state.folderPath.isEmpty &&
+        state.images.isEmpty;
+  }
+
   void loadFromReview({required ReviewDetailed review}) {
     state = ReviewForm(
       rating: review.review.rating,
