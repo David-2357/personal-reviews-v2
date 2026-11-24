@@ -53,6 +53,10 @@ class ItemRepository {
     );
   }
 
+  Future<bool> updateImagePathById(int id, String? imagePath) {
+    return _itemsDao.updateImagePathById(id, imagePath);
+  }
+
   Future<bool> deleteById(int id) {
     return _itemsDao.setDeletedById(id, true);
   }

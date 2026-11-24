@@ -55,8 +55,8 @@ class ItemReviewRepository {
           folderId: form.folderPath.isEmpty ? null : form.folderPath.last.id,
           imagePath: form.imagePaths.isNotEmpty ? form.imagePaths.first : null,
         );
-      } else {
-        // Update the item if it exists.
+      } else if (form.reviewExists) {
+        // Update the item if it exists and the review exists.
         await itemRepository.updateById(
           itemId,
           name: form.itemName,
@@ -64,6 +64,14 @@ class ItemReviewRepository {
           folderId: form.folderPath.isEmpty ? null : form.folderPath.last.id,
           imagePath: form.imagePaths.isNotEmpty ? form.imagePaths.first : null,
         );
+      } else {
+        // Update only if theres photos
+        if (form.imagePaths.isNotEmpty) {
+          await itemRepository.updateImagePathById(
+            itemId,
+            form.imagePaths.first,
+          );
+        }
       }
 
       // Create or update the review.
