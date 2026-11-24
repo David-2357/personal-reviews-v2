@@ -1,4 +1,5 @@
 import 'package:personal_reviews/features/folder_explorer/folder_explorer.dart';
+import 'package:personal_reviews/shared/components/app_main_floating_buttons.dart';
 import 'package:personal_reviews/shared/layouts/secondary_layout.dart';
 import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/style/design_system/app_radius.dart';
@@ -28,6 +29,10 @@ class FolderItems extends StatelessWidget {
       title: 'Ver carpeta',
       actions: _buildMenuActions(folder.folder.id),
       scrollable: false,
+      floatingActionButton: AppMainFloatingButtons(
+        folderPath: folderPath,
+        bottomPadding: true,
+      ),
       child: _FolderElementsList(
         folder: folder,
         folderPath: folderPath,

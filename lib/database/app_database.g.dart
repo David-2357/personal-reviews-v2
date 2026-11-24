@@ -1753,14 +1753,16 @@ class $ReviewsTable extends Reviews with TableInfo<$ReviewsTable, Review> {
   );
   static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
   @override
-  late final GeneratedColumn<int> rating = GeneratedColumn<int>(
+  late final GeneratedColumn<double> rating = GeneratedColumn<double>(
     'rating',
     aliasedName,
     false,
-    check: () => ComparableExpr(rating).isBetweenValues(1, 10),
-    type: DriftSqlType.int,
+    check: () =>
+        ComparableExpr(rating).isBiggerOrEqual(const Constant(0.0)) &
+        ComparableExpr(rating).isSmallerOrEqual(const Constant(5.0)),
+    type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant(1),
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _commentMeta = const VerificationMeta(
     'comment',
@@ -1920,7 +1922,7 @@ class $ReviewsTable extends Reviews with TableInfo<$ReviewsTable, Review> {
         data['${effectivePrefix}id'],
       )!,
       rating: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.double,
         data['${effectivePrefix}rating'],
       )!,
       comment: attachedDatabase.typeMapping.read(
@@ -1958,7 +1960,7 @@ class $ReviewsTable extends Reviews with TableInfo<$ReviewsTable, Review> {
 
 class Review extends DataClass implements Insertable<Review> {
   final int id;
-  final int rating;
+  final double rating;
   final String comment;
   final bool isDeleted;
   final DateTime? deletedAt;
@@ -1979,7 +1981,7 @@ class Review extends DataClass implements Insertable<Review> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['rating'] = Variable<int>(rating);
+    map['rating'] = Variable<double>(rating);
     map['comment'] = Variable<String>(comment);
     map['is_deleted'] = Variable<bool>(isDeleted);
     if (!nullToAbsent || deletedAt != null) {
@@ -2017,7 +2019,7 @@ class Review extends DataClass implements Insertable<Review> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Review(
       id: serializer.fromJson<int>(json['id']),
-      rating: serializer.fromJson<int>(json['rating']),
+      rating: serializer.fromJson<double>(json['rating']),
       comment: serializer.fromJson<String>(json['comment']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -2031,7 +2033,7 @@ class Review extends DataClass implements Insertable<Review> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'rating': serializer.toJson<int>(rating),
+      'rating': serializer.toJson<double>(rating),
       'comment': serializer.toJson<String>(comment),
       'isDeleted': serializer.toJson<bool>(isDeleted),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -2043,7 +2045,7 @@ class Review extends DataClass implements Insertable<Review> {
 
   Review copyWith({
     int? id,
-    int? rating,
+    double? rating,
     String? comment,
     bool? isDeleted,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -2115,7 +2117,7 @@ class Review extends DataClass implements Insertable<Review> {
 
 class ReviewsCompanion extends UpdateCompanion<Review> {
   final Value<int> id;
-  final Value<int> rating;
+  final Value<double> rating;
   final Value<String> comment;
   final Value<bool> isDeleted;
   final Value<DateTime?> deletedAt;
@@ -2145,7 +2147,7 @@ class ReviewsCompanion extends UpdateCompanion<Review> {
        itemId = Value(itemId);
   static Insertable<Review> custom({
     Expression<int>? id,
-    Expression<int>? rating,
+    Expression<double>? rating,
     Expression<String>? comment,
     Expression<bool>? isDeleted,
     Expression<DateTime>? deletedAt,
@@ -2167,7 +2169,7 @@ class ReviewsCompanion extends UpdateCompanion<Review> {
 
   ReviewsCompanion copyWith({
     Value<int>? id,
-    Value<int>? rating,
+    Value<double>? rating,
     Value<String>? comment,
     Value<bool>? isDeleted,
     Value<DateTime?>? deletedAt,
@@ -2194,7 +2196,7 @@ class ReviewsCompanion extends UpdateCompanion<Review> {
       map['id'] = Variable<int>(id.value);
     }
     if (rating.present) {
-      map['rating'] = Variable<int>(rating.value);
+      map['rating'] = Variable<double>(rating.value);
     }
     if (comment.present) {
       map['comment'] = Variable<String>(comment.value);
@@ -4284,7 +4286,7 @@ typedef $$ItemsTableProcessedTableManager =
 typedef $$ReviewsTableCreateCompanionBuilder =
     ReviewsCompanion Function({
       Value<int> id,
-      Value<int> rating,
+      Value<double> rating,
       required String comment,
       Value<bool> isDeleted,
       Value<DateTime?> deletedAt,
@@ -4295,7 +4297,7 @@ typedef $$ReviewsTableCreateCompanionBuilder =
 typedef $$ReviewsTableUpdateCompanionBuilder =
     ReviewsCompanion Function({
       Value<int> id,
-      Value<int> rating,
+      Value<double> rating,
       Value<String> comment,
       Value<bool> isDeleted,
       Value<DateTime?> deletedAt,
@@ -4359,7 +4361,7 @@ class $$ReviewsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get rating => $composableBuilder(
+  ColumnFilters<double> get rating => $composableBuilder(
     column: $table.rating,
     builder: (column) => ColumnFilters(column),
   );
@@ -4452,7 +4454,7 @@ class $$ReviewsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get rating => $composableBuilder(
+  ColumnOrderings<double> get rating => $composableBuilder(
     column: $table.rating,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4518,7 +4520,7 @@ class $$ReviewsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get rating =>
+  GeneratedColumn<double> get rating =>
       $composableBuilder(column: $table.rating, builder: (column) => column);
 
   GeneratedColumn<String> get comment =>
@@ -4614,7 +4616,7 @@ class $$ReviewsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> rating = const Value.absent(),
+                Value<double> rating = const Value.absent(),
                 Value<String> comment = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -4634,7 +4636,7 @@ class $$ReviewsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> rating = const Value.absent(),
+                Value<double> rating = const Value.absent(),
                 required String comment,
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),

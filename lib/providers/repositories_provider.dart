@@ -1,5 +1,6 @@
 import 'package:personal_reviews/data/repositories/category_repository.dart';
 import 'package:personal_reviews/data/repositories/folder_repository.dart';
+import 'package:personal_reviews/data/repositories/item_review_repository.dart';
 import 'package:personal_reviews/data/repositories/review_repository.dart';
 import 'package:personal_reviews/data/repositories/item_repository.dart';
 import 'package:personal_reviews/providers/app_database_provider.dart';
@@ -27,4 +28,13 @@ final itemRepositoryProvider = Provider<ItemRepository>((ref) {
   final database = ref.watch(appDatabaseProvider);
 
   return ItemRepository(database.itemsDao);
+});
+
+final itemReviewRepositoryProvider = Provider<ItemReviewRepository>((ref) {
+  return ItemReviewRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(reviewRepositoryProvider),
+    ref.watch(itemRepositoryProvider),
+    ref.watch(categoryRepositoryProvider),
+  );
 });

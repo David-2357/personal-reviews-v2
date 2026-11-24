@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:personal_reviews/style/design_system/app_radius.dart';
 
 import 'app_colors.dart';
 import 'app_button_theme.dart';
@@ -52,6 +53,7 @@ final appTheme = ThemeData(
   inputDecorationTheme: appInputDecorationTheme,
 
   searchBarTheme: appSearchBarTheme,
+  dropdownMenuTheme: appDropdownMenuTheme,
 
   /* Chips */
   chipTheme: ChipThemeData(
@@ -90,6 +92,12 @@ final appTheme = ThemeData(
 
   segmentedButtonTheme: SegmentedButtonThemeData(
     style: AppButtonStyles.segmented(colorScheme),
+  ),
+
+  floatingActionButtonTheme: FloatingActionButtonThemeData(
+    backgroundColor: colorScheme.primaryContainer,
+    foregroundColor: colorScheme.onPrimary,
+    shape: RoundedRectangleBorder(borderRadius: AppRadius.md),
   ),
 
   /* Range */

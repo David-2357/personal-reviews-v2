@@ -81,6 +81,17 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
         .then((rowsAffected) => rowsAffected > 0);
   }
 
+  Future<bool> updateImagePathById(int id, String? imagePath) {
+    return (update(items)..where((t) => t.id.equals(id)))
+        .write(
+          ItemsCompanion(
+            imagePath: Value(imagePath),
+            updatedAt: Value(DateTime.now()),
+          ),
+        )
+        .then((rowsAffected) => rowsAffected > 0);
+  }
+
   Future<bool> setDeletedById(int id, bool isDeleted) {
     return (update(items)..where((t) => t.id.equals(id)))
         .write(

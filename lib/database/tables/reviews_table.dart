@@ -6,9 +6,12 @@ import 'package:personal_reviews/database/tables/items_table.dart';
 @TableIndex(name: 'reviews_index', columns: {#itemId, #isDeleted})
 class Reviews extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get rating => integer()
-      .check(rating.isBetweenValues(1, 10))
-      .withDefault(const Constant(1))();
+  Column<double> get rating => real()
+      .withDefault(const Constant(0.0))
+      .check(
+        rating.isBiggerOrEqual(const Constant(0.0)) &
+            rating.isSmallerOrEqual(const Constant(5.0)),
+      )();
   TextColumn get comment => text()();
 
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();

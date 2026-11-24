@@ -9,7 +9,9 @@ abstract final class AppSpacing {
   static const md = 16.0;
   static const alg = 20.0;
   static const lg = 24.0;
+  static const axl = 28.0;
   static const xl = 32.0;
+  static const xxl = 40.0;
 
   static const messageTopSpacing = 60.0;
   static const listBottomSpacing = 60.0;

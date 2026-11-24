@@ -22,21 +22,21 @@ class ElementsFilter {
 
   final ElementsVisibility visibility;
   final List<int> categoryIds;
-  final int minRating;
-  final int maxRating;
+  final double minRating;
+  final double maxRating;
 
   const ElementsFilter({
     this.visibility = ElementsVisibility.all,
     this.categoryIds = const [],
     this.minRating = 0,
-    this.maxRating = 10,
+    this.maxRating = 5,
   });
 
   ElementsFilter copyWith({
     ElementsVisibility? visibility,
     List<int>? categoryIds,
-    int? minRating,
-    int? maxRating,
+    double? minRating,
+    double? maxRating,
   }) {
     return ElementsFilter(
       visibility: visibility ?? this.visibility,
@@ -59,7 +59,7 @@ class ElementsFilter {
   }
 
   bool isRatingActive() {
-    return minRating > 0 || maxRating < 10;
+    return minRating > 0 || maxRating < 5;
   }
 
   bool isCategoriesActive() {

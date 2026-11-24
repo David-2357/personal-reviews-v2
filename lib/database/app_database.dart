@@ -112,11 +112,7 @@ class AppDatabase extends _$AppDatabase {
 
       beforeOpen: (openingDetails) async {
         if (isInDebugMode) {
-          final m = createMigrator();
-          for (final table in allTables) {
-            await m.deleteTable(table.actualTableName);
-            await m.createTable(table);
-          }
+          await deleteDatabase();
         }
       },
     );
@@ -288,7 +284,7 @@ class AppDatabase extends _$AppDatabase {
       batch.insertAll(reviews, [
         ReviewsCompanion.insert(
           itemId: 6,
-          rating: Value(10),
+          rating: Value(2.5),
           comment:
               'Una novela increíble, con un mundo fascinante y personajes memorables.',
         ),
@@ -315,21 +311,21 @@ class AppDatabase extends _$AppDatabase {
 
         ReviewsCompanion.insert(
           itemId: 9,
-          rating: Value(4),
+          rating: Value(1.5),
           comment:
               'El ramen quedó muy sabroso, aunque me hubiera gustado un poco más de picante.',
         ),
 
         ReviewsCompanion.insert(
           itemId: 10,
-          rating: Value(3),
+          rating: Value(0.5),
           comment:
               'El ambiente del restaurante es agradable, pero la comida no cumplió mis expectativas.',
         ),
 
         ReviewsCompanion.insert(
           itemId: 5,
-          rating: Value(7),
+          rating: Value(3),
           comment:
               'Dune es una obra maestra de la ciencia ficción, con un mundo complejo y una historia épica.',
         ),

@@ -1,4 +1,3 @@
-import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/style/design_system/app_radius.dart';
 import 'package:personal_reviews/style/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +6,9 @@ abstract final class AppSnackbar {
   static const Duration _duration = Duration(seconds: 3);
   static const AnimationStyle _animationStyle = AnimationStyle(
     duration: Duration(milliseconds: 500),
-    reverseDuration: Duration(milliseconds: 400),
+    reverseDuration: Duration(milliseconds: 500),
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
   );
 
   static void showError(BuildContext context, String message) {
@@ -16,6 +17,15 @@ abstract final class AppSnackbar {
       message,
       backgroundColor: AppColors.error,
       icon: Icons.error_outline,
+    );
+  }
+
+  static void showWarning(BuildContext context, String message) {
+    _show(
+      context,
+      message,
+      backgroundColor: AppColors.warningContainer,
+      icon: Icons.warning_amber,
     );
   }
 
@@ -34,12 +44,20 @@ abstract final class AppSnackbar {
     required Color backgroundColor,
     IconData? icon,
   }) {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Elimina los SnackBars pendientes.
+    scaffoldMessenger.clearSnackBars();
+
+    // Cierra el SnackBar actual.
+    scaffoldMessenger.hideCurrentSnackBar();
+
+    // Muestra el nuevo SnackBar.
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: _AnimatedSnackbarContent(message: message, icon: icon),
         backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        margin: AppInsets.allMd,
+        behavior: SnackBarBehavior.fixed,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.md),
         duration: _duration,
         showCloseIcon: true,

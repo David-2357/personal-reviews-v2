@@ -34,8 +34,8 @@ class ReviewsDao extends DatabaseAccessor<AppDatabase> with _$ReviewsDaoMixin {
   }
 
   Future<int> create({
-    required String comment,
-    required int rating,
+    String comment = '',
+    required double rating,
     required int itemId,
   }) {
     return into(reviews).insert(
@@ -50,7 +50,7 @@ class ReviewsDao extends DatabaseAccessor<AppDatabase> with _$ReviewsDaoMixin {
   Future<bool> updateById(
     int id, {
     required String comment,
-    required int rating,
+    required double rating,
     required int itemId,
   }) {
     return (update(reviews)..where((t) => t.id.equals(id)))

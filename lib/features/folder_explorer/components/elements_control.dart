@@ -302,8 +302,7 @@ class _ActiveFiltersList extends StatelessWidget {
 
                 if (filter.isRatingActive())
                   _FilterChip(
-                    label:
-                        '${config.convertRatingToStr(filter.minRating)} - ${config.convertRatingToStr(filter.maxRating)} ★',
+                    label: '${filter.minRating} - ${filter.maxRating} ★',
                     onTap: onFilterPressed,
                   ),
 

@@ -9,12 +9,17 @@ class SecondaryLayout extends StatelessWidget {
   final String? title;
   final bool scrollable;
   final List<MenuAction> actions;
+  final Widget? floatingActionButton;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
+
   const SecondaryLayout({
     super.key,
     required this.child,
     this.title,
     this.scrollable = true,
     this.actions = const [],
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
   });
 
   @override
@@ -25,6 +30,8 @@ class SecondaryLayout extends StatelessWidget {
     );
 
     return Scaffold(
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
       appBar: AppBar(
         toolbarHeight: 40,
         title: Text(

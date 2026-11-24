@@ -24,6 +24,8 @@ abstract final class AppColors {
   static const error = Color(0xFFDC2626);
   static const warning = Color(0xFFF59E0B);
 
+  static const warningContainer = Color(0xFF996100);
+
   static const onSurface = Color(0xFFE5E7EB);
   static const onSurfaceVariant = Color(0xFF9CA3AF);
 

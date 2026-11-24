@@ -1,4 +1,5 @@
 import 'package:personal_reviews/features/app_shell/components/main_appbar.dart';
+import 'package:personal_reviews/shared/components/app_main_floating_buttons.dart';
 import 'package:personal_reviews/style/design_system/app_radius.dart';
 import 'package:personal_reviews/style/design_system/app_spacing.dart';
 import 'package:personal_reviews/core/extensions/theme_context.dart';
@@ -59,6 +60,8 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
+
+      floatingActionButton: AppMainFloatingButtons(),
 
       appBar: MainAppBar(title: currentPage.title),
 

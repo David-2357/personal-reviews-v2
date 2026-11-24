@@ -33,3 +33,64 @@ class FolderDetailedMapper {
     return rows.map((row) => fromRow(row)).toList();
   }
 }
+
+class FolderWithChildrenMapper {
+  static List<FolderWithChildren> convertToTree(List<FolderDomain> folders) {
+    final foldersById = <int, FolderDomain>{
+      for (final folder in folders) folder.id: folder,
+    };
+
+    final childrenByParentId = <int, List<FolderDomain>>{};
+
+    for (final folder in folders) {
+      final parentId = folder.parentId;
+
+      if (parentId != null && foldersById.containsKey(parentId)) {
+        childrenByParentId.putIfAbsent(parentId, () => []).add(folder);
+      }
+    }
+
+    FolderWithChildren buildTree(FolderDomain folder) {
+      final children = childrenByParentId[folder.id] ?? const [];
+
+      return FolderWithChildren(
+        folder: folder,
+        children: [for (final child in children) buildTree(child)],
+      );
+    }
+
+    return [
+      for (final folder in folders)
+        if (folder.parentId == null ||
+            !foldersById.containsKey(folder.parentId))
+          buildTree(folder),
+    ];
+  }
+
+  static List<FolderDomain> flattenTree(List<FolderWithChildren> tree) {
+    final List<FolderDomain> result = [];
+
+    void traverse(FolderWithChildren node) {
+      result.add(node.folder);
+      for (final child in node.children) {
+        traverse(child);
+      }
+    }
+
+    for (final root in tree) {
+      traverse(root);
+    }
+
+    return result;
+  }
+
+  static List<FolderDomain> flattenOnlyParentFolders(
+    List<FolderWithChildren> folders,
+  ) {
+    final List<FolderDomain> result = [];
+    for (final folder in folders) {
+      result.add(folder.folder);
+    }
+    return result;
+  }
+}

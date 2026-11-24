@@ -1,4 +1,5 @@
 import 'package:personal_reviews/features/folder_explorer/folder_explorer.dart';
+import 'package:personal_reviews/shared/components/app_main_floating_buttons.dart';
 import 'package:personal_reviews/shared/layouts/secondary_layout.dart';
 import 'package:personal_reviews/core/constants/category_icons.dart';
 import 'package:personal_reviews/core/extensions/theme_context.dart';
@@ -22,6 +23,10 @@ class ViewCategoryReviews extends StatelessWidget {
       title: 'Ver categoría',
       scrollable: false,
       actions: _buildMenuActions(category.category.id),
+      floatingActionButton: AppMainFloatingButtons(
+        category: category.category,
+        bottomPadding: true,
+      ),
       child: _CategoryElementsList(category: category),
     );
   }
