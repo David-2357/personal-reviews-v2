@@ -35,207 +35,218 @@ class ManageReview extends ConsumerStatefulWidget {
 }
 
 class ManageReviewState extends ConsumerState<ManageReview> {
-  bool isSaving = false;
+  bool _isSaving = false;
   bool _allowPop = false;
   bool _isShowingDiscardDialog = false;
   bool isEditing = false;
+  bool isAddingReviewToItem = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final notifier = ref.read(reviewFormProvider.notifier);
 
       if (widget.reviewToEdit != null) {
+        setState(() {
+          if (widget.reviewToEdit?.reviewId != 0) {
+            isEditing = true;
+            isAddingReviewToItem = false;
+          } else {
+            isAddingReviewToItem = true;
+            isEditing = false;
+          }
+        });
+
         notifier.loadFromForm(form: widget.reviewToEdit!);
-        isEditing = true;
-      } else {
-        isEditing = false;
-        notifier.reset();
-        notifier.updateCategory(
-          widget.category?.id ?? 0,
-          widget.category?.name ?? '',
-        );
-        notifier.updateFolderPath(
+        return;
+      }
+
+      isEditing = false;
+      isAddingReviewToItem = false;
+
+      notifier
+        ..reset()
+        ..updateCategory(widget.category?.id, widget.category?.name)
+        ..updateFolderPath(
           widget.folderPath.map((folder) => folder.folder).toList(),
         );
-      }
     });
   }
 
-  ReviewForm? saveReviewForm() {
-    final form = ref.read(reviewFormProvider);
-    final hasItemName = form.itemName.trim().isNotEmpty;
-    final hasCategory = form.categoryId != null && form.categoryId! > 0;
+  ReviewForm? _validateForm() {
+    final notifier = ref.read(reviewFormProvider.notifier);
+    final errors = notifier.validate();
 
-    var fieldsNames = '';
-
-    if (!hasItemName) {
-      fieldsNames += 'el nombre del objetivo';
-    }
-
-    if (!hasCategory) {
-      if (fieldsNames.isNotEmpty) fieldsNames += ' y ';
-      fieldsNames += 'la categoría';
-    }
-
-    if (!hasItemName || !hasCategory) {
+    if (errors.isNotEmpty) {
       AppSnackbar.showWarning(
         context,
-        'Se necesita $fieldsNames antes de guardar la reseña.',
+        'Se necesita ${errors.join(' y ')} antes de guardar la reseña.',
       );
       return null;
     }
 
-    return form;
+    return ref.read(reviewFormProvider);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  Future<void> _handleSaveError(Object error, StackTrace stackTrace) async {
+    await AppCriticErrorDialog.show(
+      context,
+      ErrorTypePresenter.of(ErrorType.database),
+      'Ocurrió un error al guardar la reseña. Por favor, inténtalo de nuevo.',
+      onRetry: () async {
+        await _save();
+      },
+    );
+  }
+
+  Future<void> _save() async {
+    if (_isSaving || !mounted) return;
+
+    final form = _validateForm();
+
+    if (form == null) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final repository = ref.read(itemReviewProvider);
+
+      await repository.createOrUpdateReview(form);
+
+      if (!mounted) return;
+
+      goBackAfterSave();
+    } catch (error, stackTrace) {
+      if (!mounted) return;
+
+      await _handleSaveError(error, stackTrace);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
+
+  void goBackAfterSave() {
+    if (!mounted || !Navigator.canPop(context)) return;
+
+    ref.read(reviewFormProvider.notifier).reset();
+
+    Navigator.pop(context);
+
+    AppSnackbar.showSuccess(context, 'Reseña guardada exitosamente');
+  }
+
+  void goBackWithoutSaving() {
+    if (!mounted || !Navigator.canPop(context)) return;
+
+    ref.read(reviewFormProvider.notifier).reset();
+
+    Navigator.pop(context);
+  }
+
+  Future<void> onResetPressed() async {
+    final reviewFormNotifier = ref.read(reviewFormProvider.notifier);
+
+    if (reviewFormNotifier.hasChanges()) {
+      AppConfirmationDialog.show(
+        context,
+        title: isEditing
+            ? '¿Volver con los cambios de la reseña original?'
+            : '¿Volver a la reseña en blanco?',
+        confirmText: 'Aceptar',
+        cancelText: 'Cancelar',
+        icon: Icons.restart_alt_rounded,
+      ).then((confirmed) {
+        if (confirmed == true) {
+          reviewFormNotifier.reset();
+        }
+      });
+    } else {
+      reviewFormNotifier.reset();
+    }
+  }
+
+  Future<void> _confirmDiscardChanges() async {
+    if (!mounted || _isSaving || _isShowingDiscardDialog || _allowPop) {
+      return;
+    }
+
+    final hasChanges = ref.read(reviewFormProvider.notifier).hasChanges();
+
+    if (!hasChanges) return;
+
+    _isShowingDiscardDialog = true;
+
+    bool? confirmed;
+
+    try {
+      confirmed = await AppConfirmationDialog.show(
+        context,
+        title: '¿Quieres descartar los cambios?',
+        confirmText: 'Descartar',
+        cancelText: 'Seguir editando',
+        icon: Icons.warning_amber,
+        confirmColor: AppColors.warningContainer,
+      );
+    } finally {
+      _isShowingDiscardDialog = false;
+    }
+
+    if (!mounted || confirmed != true) return;
+
+    setState(() {
+      _allowPop = true;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    });
+  }
+
+  String get _appBarTitle {
+    if (isEditing) {
+      return 'Editar Reseña';
+    } else if (isAddingReviewToItem) {
+      return 'Agregar Reseña';
+    } else {
+      return 'Nueva Reseña';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final itemReviewRepository = ref.watch(itemReviewProvider);
     ref.watch(reviewFormProvider);
 
-    final reviewFormNotifier = ref.read(reviewFormProvider.notifier);
-    final hasChanges =
-        (isEditing && reviewFormNotifier.hasChanges(widget.reviewToEdit!) ||
-        !isEditing && !reviewFormNotifier.isEmpty());
-
-    Future<void> goBackAfterSave() async {
-      if (!mounted || !Navigator.canPop(context)) return;
-
-      debugPrint(
-        'Reseña guardada exitosamente. Regresando a la pantalla anterior...',
-      );
-
-      // Resetear el formulario mientras ref todavía es válido.
-      ref.read(reviewFormProvider.notifier).reset();
-
-      Navigator.pop(context);
-
-      // Mostrar el SnackBar despues de abandonar la pantalla.
-      AppSnackbar.showSuccess(context, 'Reseña guardada exitosamente');
-    }
-
-    Future<void> save() async {
-      if (isSaving || !mounted) return;
-
-      final form = saveReviewForm();
-
-      if (form == null || !mounted) return;
-
-      setState(() {
-        isSaving = true;
-      });
-
-      try {
-        await itemReviewRepository.createOrUpdateReview(form);
-
-        if (!mounted) return;
-
-        await goBackAfterSave();
-      } catch (e) {
-        if (!mounted) return;
-
-        AppCriticErrorDialog.show(
-          context,
-          ErrorTypePresenter.of(ErrorType.database),
-          //'Ocurrió un error al guardar la reseña. Por favor, inténtalo de nuevo.',
-          e.toString(),
-          onRetry: () async {
-            await save();
-          },
-        );
-      } finally {
-        if (mounted) {
-          setState(() {
-            isSaving = false;
-          });
-        }
-      }
-    }
-
-    Future<void> onResetPressed() async {
-      debugPrint(
-        isEditing
-            ? 'Checking for changes in the form compared to the review being edited...'
-            : 'Checking if the form has any changes...',
-      );
-
-      if (hasChanges) {
-        AppConfirmationDialog.show(
-          context,
-          title: isEditing
-              ? '¿Volver con los cambios de la reseña original?'
-              : '¿Volver a la reseña en blanco?',
-          confirmText: 'Aceptar',
-          cancelText: 'Cancelar',
-          icon: Icons.restart_alt_rounded,
-        ).then((confirmed) {
-          if (confirmed == true) {
-            reviewFormNotifier.reset();
-          }
-        });
-      } else {
-        reviewFormNotifier.reset();
-      }
-    }
-
     return PopScope(
-      canPop: (!isSaving && !hasChanges) || _allowPop,
+      canPop:
+          (!_isSaving && !ref.read(reviewFormProvider.notifier).hasChanges()) ||
+          _allowPop,
       onPopInvokedWithResult: (didPop, result) async {
-        debugPrint(
-          'PopScope invoked. canPop: ${!isSaving && !hasChanges}, _allowPop: $_allowPop, didPop: $didPop',
-        );
+        if (didPop) return;
 
-        debugPrint(
-          'Is saving: $isSaving, has changes: $hasChanges, allow pop: $_allowPop',
-        );
-
-        debugPrint('Review form state: ${ref.read(reviewFormProvider)}');
-        if (didPop || _isShowingDiscardDialog) return;
-
-        _isShowingDiscardDialog = true;
-
-        final navigator = Navigator.of(context);
-
-        final confirmed = await AppConfirmationDialog.show(
-          context,
-          title: '¿Quieres descartar los cambios?',
-          confirmText: 'Descartar',
-          cancelText: 'Seguir editando',
-          icon: Icons.warning_amber,
-          confirmColor: AppColors.warningContainer,
-        );
-
-        _isShowingDiscardDialog = false;
-
-        if (confirmed != true || !mounted) return;
-
-        setState(() {
-          _allowPop = true;
-        });
-
-        // Espera a que PopScope actualice canPop.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && navigator.mounted) {
-            navigator.pop();
-          }
-        });
+        await _confirmDiscardChanges();
       },
       child: SecondaryLayout(
-        title: isEditing ? 'Editar Reseña' : 'Nueva Reseña',
+        title: _appBarTitle,
         scrollable: true,
         child: Column(
           spacing: AppSpacing.lg,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // If its editing a review, show an alert
-            if (isEditing)
+            if (isEditing || isAddingReviewToItem)
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
@@ -253,7 +264,9 @@ class ManageReviewState extends ConsumerState<ManageReview> {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        'Estás editando la reseña de "${widget.reviewToEdit?.itemName}".',
+                        isAddingReviewToItem
+                            ? 'Estás agregando una reseña a "${widget.reviewToEdit?.itemName}".'
+                            : 'Estás editando la reseña de "${widget.reviewToEdit?.itemName}".',
                         style: context.textTheme.bodyMedium?.copyWith(
                           color: context.colors.onSurfaceVariant,
                         ),
@@ -262,46 +275,51 @@ class ManageReviewState extends ConsumerState<ManageReview> {
                   ],
                 ),
               ),
-            ExpansionPanelList.radio(
-              elevation: 0,
-              initialOpenPanelValue: 'review_panel',
-              dividerColor: context.colors.onSurface.withValues(alpha: 0.2),
-              expandedHeaderPadding: const EdgeInsets.symmetric(
-                vertical: AppSpacing.xs,
+            if (!isAddingReviewToItem)
+              ExpansionPanelList.radio(
+                elevation: 0,
+                initialOpenPanelValue: 'review_panel',
+                dividerColor: context.colors.onSurface.withValues(alpha: 0.2),
+                expandedHeaderPadding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.xs,
+                ),
+
+                children: [
+                  /* Review Panel */
+                  ExpansionPanelRadio(
+                    canTapOnHeader: true,
+                    value: 'review_panel',
+                    headerBuilder: (context, isExpanded) {
+                      return AccordionHeader(
+                        title: 'Reseña',
+                        isExpanded: isExpanded || isAddingReviewToItem,
+                        summary: ReviewSummary(),
+                      );
+                    },
+
+                    body: ReviewPanel(),
+                  ),
+
+                  /* Item Panel */
+                  ExpansionPanelRadio(
+                    canTapOnHeader: true,
+                    value: 'item_panel',
+                    headerBuilder: (context, isExpanded) {
+                      return AccordionHeader(
+                        title: 'Objetivo de la reseña',
+                        isExpanded: isExpanded,
+                        summary: ItemSummary(),
+                      );
+                    },
+
+                    body: ItemPanel(),
+                  ),
+                ],
               ),
 
-              children: [
-                /* Review Panel */
-                ExpansionPanelRadio(
-                  canTapOnHeader: true,
-                  value: 'review_panel',
-                  headerBuilder: (context, isExpanded) {
-                    return AccordionHeader(
-                      title: 'Reseña',
-                      isExpanded: isExpanded,
-                      summary: ReviewSummary(),
-                    );
-                  },
-
-                  body: ReviewPanel(),
-                ),
-
-                /* Item Panel */
-                ExpansionPanelRadio(
-                  canTapOnHeader: true,
-                  value: 'item_panel',
-                  headerBuilder: (context, isExpanded) {
-                    return AccordionHeader(
-                      title: 'Objetivo de la reseña',
-                      isExpanded: isExpanded,
-                      summary: ItemSummary(),
-                    );
-                  },
-
-                  body: ItemPanel(),
-                ),
-              ],
-            ),
+            if (isAddingReviewToItem) const SizedBox(height: AppSpacing.sm),
+            if (isAddingReviewToItem) ReviewPanel(),
+            if (isAddingReviewToItem) const SizedBox(height: AppSpacing.sm),
 
             /* Save and Reset Buttons */
             Row(
@@ -325,18 +343,16 @@ class ManageReviewState extends ConsumerState<ManageReview> {
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       overlayColor: context.colors.surface,
-                      backgroundColor: isSaving
+                      backgroundColor: _isSaving
                           ? context.colors.primaryContainer.withValues(
                               alpha: 0.5,
                             )
                           : context.colors.primaryContainer,
                     ),
                     onPressed: () {
-                      if (!isSaving) {
-                        save();
-                      }
+                      _save();
                     },
-                    label: isSaving
+                    label: _isSaving
                         ? const Text('Guardando...')
                         : const Text('Guardar'),
                     icon: Icon(Icons.save_rounded),
