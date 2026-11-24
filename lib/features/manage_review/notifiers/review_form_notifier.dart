@@ -7,23 +7,25 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
   ReviewFormNotifier()
     : super(ReviewForm(rating: 0, comment: '', images: const [], itemName: ''));
 
-  bool hasChanges(ReviewForm other) {
-    return state.rating != other.rating ||
-        state.comment != other.comment ||
-        state.itemName != other.itemName ||
-        state.categoryId != other.categoryId ||
-        state.folderPath != other.folderPath ||
-        state.images.length != other.images.length ||
-        !state.images.every((image) => other.images.contains(image));
-  }
+  var _initialState = ReviewForm(
+    rating: 0,
+    comment: '',
+    images: const [],
+    itemName: '',
+  );
 
-  bool isEmpty() {
-    return state.rating == 0 &&
-        state.comment.isEmpty &&
-        state.itemName.isEmpty &&
-        state.categoryId == null &&
-        state.folderPath.isEmpty &&
-        state.images.isEmpty;
+  bool hasChanges() {
+    return state.rating != _initialState.rating ||
+        state.comment != _initialState.comment ||
+        state.itemName != _initialState.itemName ||
+        state.categoryId != _initialState.categoryId ||
+        (state.folderPath.every(
+              (folder) => !_initialState.folderPath.contains(folder),
+            ) &&
+            state.folderPath.length != _initialState.folderPath.length) ||
+        state.itemId != _initialState.itemId ||
+        state.images.length != _initialState.images.length ||
+        !state.images.every((image) => _initialState.images.contains(image));
   }
 
   void loadFromReview({required ReviewDetailed review}) {
@@ -40,10 +42,13 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
       categoryId: review.category?.id,
       folderPath: review.folderPath,
     );
+
+    _initialState = state;
   }
 
   void loadFromForm({required ReviewForm form}) {
     state = form;
+    _initialState = state;
   }
 
   void updateRating(double rating) {
@@ -58,7 +63,7 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
     state = state.copyWith(itemName: name);
   }
 
-  void updateCategory(int categoryId, String categoryName) {
+  void updateCategory(int? categoryId, String? categoryName) {
     state = state.copyWith(categoryId: categoryId, categoryName: categoryName);
   }
 
@@ -110,7 +115,24 @@ class ReviewFormNotifier extends StateNotifier<ReviewForm> {
   }
 
   void reset() {
-    state = ReviewForm(rating: 0, comment: '', images: const [], itemName: '');
+    state = _initialState;
+  }
+
+  /// Valida el formulario de revisión y devuelve una lista de campos faltantes en español para mostrar al usuario.
+  ///
+  /// @return List - Una lista de errores que indica los campos faltantes
+  List<String> validate() {
+    final errors = <String>[];
+
+    if (state.itemName.trim().isEmpty) {
+      errors.add('el nombre del objetivo');
+    }
+
+    if (state.categoryId == null || state.categoryId! <= 0) {
+      errors.add('la categoría');
+    }
+
+    return errors;
   }
 }
 
