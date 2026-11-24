@@ -13,6 +13,7 @@ abstract final class AppConfirmationDialog {
     String cancelText = 'Cancelar',
     IconData? icon,
     Color? confirmColor,
+    Color? iconColor,
     bool barrierDismissible = false,
   }) {
     return showGeneralDialog<bool>(
@@ -33,6 +34,7 @@ abstract final class AppConfirmationDialog {
                 cancelText: cancelText,
                 icon: icon,
                 confirmColor: confirmColor,
+                iconColor: iconColor,
               ),
             ),
           ),
@@ -53,6 +55,7 @@ class _ConfirmationDialogContent extends StatelessWidget {
     required this.cancelText,
     this.icon,
     this.confirmColor,
+    this.iconColor,
   });
 
   final String title;
@@ -61,6 +64,7 @@ class _ConfirmationDialogContent extends StatelessWidget {
   final String cancelText;
   final IconData? icon;
   final Color? confirmColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +78,9 @@ class _ConfirmationDialogContent extends StatelessWidget {
             Icon(
               icon,
               size: 42,
-              color: confirmColor ?? context.colors.primaryContainer,
+              color:
+                  iconColor ??
+                  (confirmColor ?? context.colors.primaryContainer),
             ),
             const SizedBox(height: AppSpacing.md),
           ],
